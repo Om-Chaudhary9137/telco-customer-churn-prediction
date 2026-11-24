@@ -14,7 +14,12 @@ import matplotlib.pyplot as plt
 import shap
 import streamlit as st
 
-API_BASE_URL = os.getenv("API_BASE_URL", "http://127.0.0.1:8000")
+# Read API_BASE_URL from Streamlit Cloud Secrets first, then Environment Variables, then localhost
+try:
+    API_BASE_URL = st.secrets["API_BASE_URL"].rstrip("/")
+except Exception:
+    API_BASE_URL = os.getenv("API_BASE_URL", "http://127.0.0.1:8000").rstrip("/")
+
 
 st.set_page_config(
     page_title="RetentionAI | Customer Churn Intelligence",
@@ -42,7 +47,7 @@ st.markdown(
 
 def check_api_health() -> bool:
     try:
-        resp = requests.get(f"{API_BASE_URL}/health", timeout=2)
+        resp = requests.get(f"{API_BASE_URL}/health", timeout=30)
         return resp.status_code == 200
     except requests.exceptions.RequestException:
         return False
